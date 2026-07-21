@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/nickelpack/tauri-v2-docs/main/tauri.conf.schema.json",
   "productName": "DevIgnite",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "identifier": "com.devignite.app",
   "build": {
     "frontendDist": "../dist",

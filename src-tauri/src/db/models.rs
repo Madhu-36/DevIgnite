@@ -41,7 +41,7 @@ pub struct PathState {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct SmokeTestResult {
+pub struct SmokeTestRecord {
     pub id: String,
     pub runtime_id: String,
     pub test_command: String,
@@ -53,7 +53,7 @@ pub struct SmokeTestResult {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct DoctorReport {
+pub struct DoctorHistoryRecord {
     pub id: String,
     pub run_at: String,
     pub issues_found: i32,
@@ -62,20 +62,31 @@ pub struct DoctorReport {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct RuntimeManifest {
+pub struct RuntimeCatalogEntry {
+    pub id: String,
     pub language: String,
-    pub versions: Vec<RuntimeVersion>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct RuntimeVersion {
     pub version: String,
+    pub display_name: String,
     pub download_url: String,
     pub checksum_url: String,
     pub sha256: String,
     pub binary_name: String,
     pub platform: String,
     pub arch: String,
+    pub file_size_bytes: i64,
+    pub release_date: String,
+    pub is_installed: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LanguageManifest {
+    pub id: String,
+    pub name: String,
+    pub icon: String,
+    pub description: String,
+    pub website: String,
+    pub supported: bool,
+    pub version_count: i32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -85,4 +96,16 @@ pub struct InstallProgress {
     pub stage: String,
     pub progress_percent: u8,
     pub message: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SandboxStatus {
+    pub home_dir: String,
+    pub sandbox_root: String,
+    pub bin_dir: String,
+    pub runtimes_dir: String,
+    pub total_runtimes: usize,
+    pub total_symlinks: usize,
+    pub path_injected: bool,
+    pub disk_usage_bytes: u64,
 }

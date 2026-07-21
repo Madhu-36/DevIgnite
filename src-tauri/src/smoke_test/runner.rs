@@ -1,4 +1,4 @@
-use super::{SmokeTestConfig, SmokeTestOutcome, SmokeTestSuiteResult};
+use super::{SmokeTestConfig, SmokeTestOutcome, SmokeTestSuiteResult, TestCase};
 use anyhow::{Context, Result};
 use std::path::Path;
 use std::process::{Command, Stdio};
@@ -10,146 +10,95 @@ pub struct SmokeTestRunner {
 
 impl SmokeTestRunner {
     pub fn new() -> Self {
-        Self {
-            timeout: Duration::from_secs(30),
-        }
+        Self { timeout: Duration::from_secs(30) }
     }
 
     pub fn with_timeout(timeout_secs: u64) -> Self {
-        Self {
-            timeout: Duration::from_secs(timeout_secs),
-        }
+        Self { timeout: Duration::from_secs(timeout_secs) }
     }
 
     pub fn run_suite(&self, config: &SmokeTestConfig) -> Result<SmokeTestSuiteResult> {
-        let suite_start = Instant::now();
+        let start = Instant::now();
         let mut outcomes = Vec::new();
         let mut all_passed = true;
 
-        for test_case in &config.test_cases {
-            let outcome = self.run_single_test(test_case)?;
-            if !outcome.passed {
-                all_passed = false;
-            }
+        for tc in &config.test_cases {
+            let outcome = self.run_single(tc)?;
+            if !outcome.passed { all_passed = false; }
             outcomes.push(outcome);
         }
-
-        let total_duration_ms = suite_start.elapsed().as_millis() as u64;
 
         Ok(SmokeTestSuiteResult {
             language: config.language.clone(),
             version: config.version.clone(),
             all_passed,
             outcomes,
-            total_duration_ms,
+            total_duration_ms: start.elapsed().as_millis() as u64,
         })
     }
 
-    fn run_single_test(
-        &self,
-        test_case: &super::TestCase,
-    ) -> Result<SmokeTestOutcome> {
+    fn run_single(&self, tc: &TestCase) -> Result<SmokeTestOutcome> {
         let start = Instant::now();
-        let test_timeout =
-            Duration::from_secs(test_case.timeout_secs).min(self.timeout);
+        let test_timeout = Duration::from_secs(tc.timeout_secs).min(self.timeout);
+        let binary = Path::new(&tc.command);
 
-        let binary_path = Path::new(&test_case.command);
-        if !binary_path.exists() {
+        if !binary.exists() {
             return Ok(SmokeTestOutcome {
-                test_name: test_case.name.clone(),
-                passed: false,
-                exit_code: -1,
-                stdout: String::new(),
-                stderr: String::new(),
+                test_name: tc.name.clone(),
+                passed: false, exit_code: -1,
+                stdout: String::new(), stderr: String::new(),
                 duration_ms: start.elapsed().as_millis() as u64,
-                error: Some(format!(
-                    "Binary not found at: {}",
-                    test_case.command
-                )),
+                error: Some(format!("Binary not found: {}", tc.command)),
             });
         }
 
-        let mut cmd = Command::new(&test_case.command);
-        cmd.args(&test_case.args)
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped());
+        let mut cmd = Command::new(&tc.command);
+        cmd.args(&tc.args).stdout(Stdio::piped()).stderr(Stdio::piped());
 
-        if let Some(ref stdin_data) = test_case.stdin_input {
+        if let Some(ref stdin_data) = tc.stdin_input {
             cmd.stdin(Stdio::piped());
-            let mut child = cmd
-                .spawn()
-                .context("Failed to spawn test process")?;
-
+            let mut child = cmd.spawn().context("Failed to spawn")?;
             if let Some(mut stdin) = child.stdin.take() {
                 use std::io::Write;
                 stdin.write_all(stdin_data.as_bytes())?;
                 drop(stdin);
             }
-
-            let output = child
-                .wait_with_output()
-                .context("Failed to wait for test process")?;
-
-            let stdout = String::from_utf8_lossy(&output.stdout).to_string();
-            let stderr = String::from_utf8_lossy(&output.stderr).to_string();
-            let exit_code = output.status.code().unwrap_or(-1);
-
-            let passed = exit_code == test_case.expected_exit_code
-                && check_stdout_pattern(&stdout, test_case.expected_stdout_pattern.as_deref());
-
-            return Ok(SmokeTestOutcome {
-                test_name: test_case.name.clone(),
-                passed,
-                exit_code,
-                stdout,
-                stderr,
-                duration_ms: start.elapsed().as_millis() as u64,
-                error: None,
-            });
+            let output = child.wait_with_output()?;
+            return self.build_outcome(tc, output, start);
         }
 
-        let output = cmd
-            .output()
-            .context("Failed to execute test command")?;
+        let output = cmd.output().context("Failed to execute")?;
+        self.build_outcome(tc, output, start)
+    }
 
+    fn build_outcome(
+        &self,
+        tc: &TestCase,
+        output: std::process::Output,
+        start: Instant,
+    ) -> Result<SmokeTestOutcome> {
         let stdout = String::from_utf8_lossy(&output.stdout).to_string();
         let stderr = String::from_utf8_lossy(&output.stderr).to_string();
         let exit_code = output.status.code().unwrap_or(-1);
-
-        let passed = exit_code == test_case.expected_exit_code
-            && check_stdout_pattern(&stdout, test_case.expected_stdout_pattern.as_deref());
+        let pattern_ok = tc.expected_stdout_pattern.as_deref()
+            .map(|p| stdout.contains(p))
+            .unwrap_or(true);
 
         Ok(SmokeTestOutcome {
-            test_name: test_case.name.clone(),
-            passed,
-            exit_code,
-            stdout,
-            stderr,
+            test_name: tc.name.clone(),
+            passed: exit_code == tc.expected_exit_code && pattern_ok,
+            exit_code, stdout, stderr,
             duration_ms: start.elapsed().as_millis() as u64,
             error: None,
         })
     }
 
     pub fn quick_verify(binary_path: &str) -> Result<bool> {
-        let path = Path::new(binary_path);
-        if !path.exists() {
-            return Ok(false);
-        }
-
+        if !Path::new(binary_path).exists() { return Ok(false); }
         let output = Command::new(binary_path)
             .arg("--version")
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .output()
-            .context("Failed to execute version check")?;
-
+            .stdout(Stdio::piped()).stderr(Stdio::piped())
+            .output()?;
         Ok(output.status.success())
-    }
-}
-
-fn check_stdout_pattern(stdout: &str, pattern: Option<&str>) -> bool {
-    match pattern {
-        Some(pat) => stdout.contains(pat),
-        None => true,
     }
 }
