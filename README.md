@@ -1,11 +1,12 @@
 DevIgnite
 DevIgnite is a high-performance, cross-platform developer environment manager that lets you install, manage, and switch between programming language runtimes with a single click. Designed to eliminate "path pollution" and installation fatigue, DevIgnite keeps your system clean by using a sandboxed symlink routing engine.
 🚀 Key Features
+
 1.⚡ Zero-Config Installs: Install Python, Node.js, Rust, Go, and more without manual setup.
 
 2. 🛡️ Sandboxed Routing: Keeps your OS pristine by routing all tools through a single, controlled binary directory—no more cluttered System PATH.
 
-🔄 Instant Switching: Switch between different versions (e.g., Python 3.10 to 3.12) instantly without reinstalling.
+3. 🔄 Instant Switching: Switch between different versions (e.g., Python 3.10 to 3.12) instantly without reinstalling.
 
 🔒 Cryptographically Secure: Automatically verifies SHA-256 checksums of all downloaded binaries to ensure security.
 
