@@ -8,7 +8,7 @@ DevIgnite is a high-performance, cross-platform developer environment manager th
 
 3. 🔄 Instant Switching: Switch between different versions (e.g., Python 3.10 to 3.12) instantly without reinstalling.
 
-🔒 Cryptographically Secure: Automatically verifies SHA-256 checksums of all downloaded binaries to ensure security.
+4. 🔒 Cryptographically Secure: Automatically verifies SHA-256 checksums of all downloaded binaries to ensure security.
 
 🩺 DevIgnite Doctor: Built-in diagnostics to detect and resolve environment conflicts or broken dependencies.
 
