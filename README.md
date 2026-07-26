@@ -3,7 +3,7 @@ DevIgnite is a high-performance, cross-platform developer environment manager th
 🚀 Key Features
 1.⚡ Zero-Config Installs: Install Python, Node.js, Rust, Go, and more without manual setup.
 
-🛡️ Sandboxed Routing: Keeps your OS pristine by routing all tools through a single, controlled binary directory—no more cluttered System PATH.
+2. 🛡️ Sandboxed Routing: Keeps your OS pristine by routing all tools through a single, controlled binary directory—no more cluttered System PATH.
 
 🔄 Instant Switching: Switch between different versions (e.g., Python 3.10 to 3.12) instantly without reinstalling.
 
