@@ -41,7 +41,6 @@ npm install
 npm run tauri dev
 📈 Roadmap
 [ ] MVP: Core CLI engine for Python & Node.js installation.
-
 [ ] UI Integration: Full Tauri dashboard for language management.
 
 [ ] Doctor Module: Automated environment conflict resolution.
