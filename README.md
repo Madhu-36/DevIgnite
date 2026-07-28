@@ -35,10 +35,8 @@ Data Layer: SQLite (Persistent state management)
 Bash
 # Clone the repository
 git clone https://github.com/yourusername/DevIgnite.git
-
 # Install dependencies
 npm install
-
 # Run the development build
 npm run tauri dev
 📈 Roadmap
