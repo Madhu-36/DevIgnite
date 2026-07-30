@@ -31,7 +31,6 @@ Data Layer: SQLite (Persistent state management)
 
 📦 Getting Started (Planned)
 (You can add build instructions here later as you progress!)
-
 Bash
 # Clone the repository.
 git clone https://github.com/yourusername/DevIgnite.git
