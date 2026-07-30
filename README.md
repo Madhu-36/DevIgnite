@@ -26,7 +26,6 @@ OS-Native Integration: On Windows, DevIgnite uses the Windows API to broadcast e
 Core Engine: Rust (High-performance OS-level orchestration)
 
 Frontend UI: Tauri + React (Modern, lightweight desktop interface)
-
 Data Layer: SQLite (Persistent state management)
 
 📦 Getting Started (Planned)
