@@ -1,5 +1,5 @@
 DevIgnite <The idea should be completed within this month of august>
-it has to be a application which could be used on any where on the application with kind of operating system
+it has to be a application which could be used on any where on the application with kind of operating system ex windows,liux
 DevIgnite is a high-performance, cross-platform developer environment manager that lets you install, manage, and switch between programming language runtimes with a single click. Designed to eliminate "path pollution" and installation fatigue, DevIgnite keeps your system clean by using a sandboxed symlink routing engine.
 🚀 Key Features
 1.⚡ Zero-Config Installs: Install Python, Node.js, Rust, Go, and more without manual setup.
