@@ -23,13 +23,35 @@ function App() {
           <div className="space-y-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold text-gray-300">Installed Runtimes</h2>
+            </div>
+            
+            <div className="bg-gray-800 p-4 rounded-lg flex space-x-3 items-center shadow-sm border border-gray-700">
+              <input 
+                id="toolName" 
+                type="text" 
+                placeholder="Tool (e.g. node)" 
+                className="bg-gray-900 border border-gray-600 rounded px-3 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500 w-1/3"
+              />
+              <input 
+                id="toolVersion" 
+                type="text" 
+                placeholder="Version (e.g. 20.10.0)" 
+                className="bg-gray-900 border border-gray-600 rounded px-3 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500 w-1/3"
+              />
               <button 
-                onClick={() => useDevIgniteStore.getState().installRuntime("node", "20.10.0")}
-                className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-sm transition-colors"
+                onClick={() => {
+                  const name = (document.getElementById('toolName') as HTMLInputElement).value;
+                  const version = (document.getElementById('toolVersion') as HTMLInputElement).value;
+                  if (name && version) {
+                    useDevIgniteStore.getState().installRuntime(name, version);
+                  }
+                }}
+                className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-md text-sm transition-colors font-medium w-1/3"
               >
-                Install Node 20.10.0
+                Install
               </button>
             </div>
+            
             <div>
               {runtimes.length === 0 ? (
                 <div className="bg-gray-800 rounded-lg p-6 text-center text-gray-400 border border-gray-700 border-dashed">
