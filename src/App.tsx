@@ -5,7 +5,7 @@ import { DoctorPanel } from './components/DoctorPanel';
 import { Layers } from 'lucide-react';
 
 function App() {
-  const { runtimes, fetchRuntimes } = useDevIgniteStore();
+  const { runtimes, fetchRuntimes, isLoading } = useDevIgniteStore();
 
   useEffect(() => {
     fetchRuntimes();
@@ -30,25 +30,29 @@ function App() {
                 id="toolName" 
                 type="text" 
                 placeholder="Tool (e.g. node)" 
-                className="bg-gray-900 border border-gray-600 rounded px-3 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500 w-1/3"
+                disabled={isLoading}
+                className="bg-gray-900 border border-gray-600 rounded px-3 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500 w-1/3 disabled:opacity-50"
               />
               <input 
                 id="toolVersion" 
                 type="text" 
                 placeholder="Version (e.g. 20.10.0)" 
-                className="bg-gray-900 border border-gray-600 rounded px-3 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500 w-1/3"
+                disabled={isLoading}
+                className="bg-gray-900 border border-gray-600 rounded px-3 py-1.5 text-sm text-white focus:outline-none focus:border-blue-500 w-1/3 disabled:opacity-50"
               />
               <button 
                 onClick={() => {
-                  const name = (document.getElementById('toolName') as HTMLInputElement).value;
+                  const name = (document.getElementById('toolName') as HTMLInputElement).value.toLowerCase();
                   const version = (document.getElementById('toolVersion') as HTMLInputElement).value;
                   if (name && version) {
                     useDevIgniteStore.getState().installRuntime(name, version);
                   }
                 }}
-                className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-md text-sm transition-colors font-medium w-1/3"
+                disabled={isLoading}
+                className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-md text-sm transition-colors font-medium w-1/3 disabled:opacity-50 flex justify-center items-center"
               >
-                Install
+                {isLoading ? <Layers className="animate-spin w-4 h-4 mr-2" /> : null}
+                {isLoading ? 'Installing...' : 'Install'}
               </button>
             </div>
             
