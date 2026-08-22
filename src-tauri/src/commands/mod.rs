@@ -66,16 +66,57 @@ pub async fn install_runtime(name: String, version: String, state: State<'_, DbS
 }
 
 #[tauri::command]
-pub fn switch_version(name: String, version: String, _state: State<'_, DbState>) -> Result<()> {
-    // Stub for symlink switch, PATH broadcast, db update
-    println!("Switching {} to version {}", name, version);
+pub fn switch_version(name: String, version: String, state: State<'_, DbState>) -> Result<()> {
+    let home_dir = directories::UserDirs::new()
+        .map(|dirs| dirs.home_dir().to_path_buf())
+        .ok_or_else(|| crate::error::AppError::Installation("No home directory found".into()))?;
+        
+    let devignite_dir = home_dir.join(".devignite");
+    let bin_dir = devignite_dir.join("bin");
+    let runtime_dir = devignite_dir.join("runtimes").join(&name).join(&version);
+    
+    // Wire up the symlink
+    if runtime_dir.exists() {
+        let symlink_path = bin_dir.join(&name);
+        crate::sandbox::create_symlink(&runtime_dir, &symlink_path)?;
+        crate::sandbox::broadcast_path_change()?;
+        
+        let conn = state.conn.lock().map_err(|e| crate::error::AppError::Unknown(anyhow::anyhow!("Mutex poisoned: {}", e)))?;
+        
+        // Deactivate old
+        conn.execute("UPDATE installed_runtimes SET is_active = 0 WHERE tool_name = ?1", rusqlite::params![name])?;
+        
+        // Activate new
+        conn.execute(
+            "UPDATE installed_runtimes SET is_active = 1 WHERE tool_name = ?1 AND version = ?2",
+            rusqlite::params![name, version],
+        )?;
+    } else {
+        return Err(crate::error::AppError::Installation("Runtime version not found locally".into()));
+    }
+    
     Ok(())
 }
 
 #[tauri::command]
-pub fn uninstall_runtime(name: String, version: String, _state: State<'_, DbState>) -> Result<()> {
-    // Stub for removal, db update
-    println!("Uninstalling {} version {}", name, version);
+pub fn uninstall_runtime(name: String, version: String, state: State<'_, DbState>) -> Result<()> {
+    let home_dir = directories::UserDirs::new()
+        .map(|dirs| dirs.home_dir().to_path_buf())
+        .ok_or_else(|| crate::error::AppError::Installation("No home directory found".into()))?;
+        
+    let devignite_dir = home_dir.join(".devignite");
+    let runtime_dir = devignite_dir.join("runtimes").join(&name).join(&version);
+    
+    if runtime_dir.exists() {
+        std::fs::remove_dir_all(&runtime_dir)?;
+    }
+    
+    let conn = state.conn.lock().map_err(|e| crate::error::AppError::Unknown(anyhow::anyhow!("Mutex poisoned: {}", e)))?;
+    conn.execute(
+        "DELETE FROM installed_runtimes WHERE tool_name = ?1 AND version = ?2",
+        rusqlite::params![name, version],
+    )?;
+
     Ok(())
 }
 
