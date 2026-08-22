@@ -79,7 +79,7 @@ pub fn switch_version(name: String, version: String, state: State<'_, DbState>) 
     if runtime_dir.exists() {
         let symlink_path = bin_dir.join(&name);
         crate::sandbox::create_symlink(&runtime_dir, &symlink_path)?;
-        crate::sandbox::broadcast_path_change()?;
+        crate::sandbox::broadcast_path_change(&bin_dir)?;
         
         let conn = state.conn.lock().map_err(|e| crate::error::AppError::Unknown(anyhow::anyhow!("Mutex poisoned: {}", e)))?;
         

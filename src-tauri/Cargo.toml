@@ -29,6 +29,7 @@ flate2 = "1.0"
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3.9", features = ["winuser"] }
 junction = "1.2.0"
+winreg = "0.52"
 
 [features]
 default = [ "custom-protocol" ]

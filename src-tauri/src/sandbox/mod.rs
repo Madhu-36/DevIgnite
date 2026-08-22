@@ -40,9 +40,28 @@ pub fn create_symlink(target: &Path, link: &Path) -> Result<()> {
     Ok(())
 }
 
-pub fn broadcast_path_change() -> Result<()> {
+pub fn broadcast_path_change(bin_dir: &Path) -> Result<()> {
     #[cfg(windows)]
     {
+        use winreg::enums::{HKEY_CURRENT_USER, KEY_READ, KEY_WRITE};
+        use winreg::RegKey;
+
+        let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+        let env = hkcu.open_subkey_with_flags("Environment", KEY_READ | KEY_WRITE).map_err(|e| AppError::Symlink(e.to_string()))?;
+        
+        let current_path: String = env.get_value("Path").unwrap_or_default();
+        let bin_dir_str = bin_dir.to_string_lossy().to_string();
+        
+        if !current_path.contains(&bin_dir_str) {
+            let new_path = if current_path.is_empty() || current_path.ends_with(';') {
+                format!("{}{};", current_path, bin_dir_str)
+            } else {
+                format!("{};{};", current_path, bin_dir_str)
+            };
+            
+            env.set_value("Path", &new_path).map_err(|e| AppError::Symlink(e.to_string()))?;
+        }
+
         let env_str: Vec<u16> = OsStr::new("Environment")
             .encode_wide()
             .chain(std::iter::once(0))
@@ -65,7 +84,7 @@ pub fn broadcast_path_change() -> Result<()> {
     {
         // Path changes typically require restarting shell or sourcing, 
         // but we can log or instruct users.
-        println!("Unix path broadcast: Please restart your terminal or source your profile.");
+        println!("Unix path broadcast: Please ensure {} is in your PATH.", bin_dir.display());
     }
 
     Ok(())
