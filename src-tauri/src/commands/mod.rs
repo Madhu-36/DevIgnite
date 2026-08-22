@@ -49,6 +49,7 @@ pub async fn install_runtime(name: String, version: String, state: State<'_, DbS
         "node" => format!("https://nodejs.org/dist/v{0}/node-v{0}-win-x64.zip", version),
         "go" => format!("https://golang.org/dl/go{0}.windows-amd64.zip", version),
         "python" => format!("https://github.com/indygreg/python-build-standalone/releases/download/20240224/cpython-{0}+20240224-x86_64-pc-windows-msvc-shared-install_only.tar.gz", version),
+        "rust" => format!("https://static.rust-lang.org/dist/rust-{0}-x86_64-pc-windows-msvc.tar.gz", version),
         _ => return Err(crate::error::AppError::Installation(format!("Unsupported runtime: {}", name))),
     };
     
