@@ -1,12 +1,15 @@
 use crate::error::Result;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct DiagnosticReport {
-    pub path_collisions: Vec<String>,
-    pub broken_symlinks: Vec<String>,
-    pub permission_issues: Vec<String>,
+    pub symlink_healthy: bool,
+    pub symlink_target: Option<String>,
+    pub devignite_in_path: bool,
+    pub permissions_ok: bool,
+    pub error_details: Vec<String>,
+    pub auto_fix_available: bool,
     pub is_healthy: bool,
 }
 
@@ -32,10 +35,18 @@ pub fn run_diagnostics(bin_dir: &PathBuf) -> Result<DiagnosticReport> {
 
     let is_healthy = broken_symlinks.is_empty() && permission_issues.is_empty() && path_collisions.is_empty();
 
+    let mut error_details = Vec::new();
+    if !broken_symlinks.is_empty() {
+        error_details.push(format!("Broken symlinks: {:?}", broken_symlinks));
+    }
+    
     Ok(DiagnosticReport {
-        path_collisions,
-        broken_symlinks,
-        permission_issues,
+        symlink_healthy: broken_symlinks.is_empty(),
+        symlink_target: None,
+        devignite_in_path: true, // Mocked for now
+        permissions_ok: permission_issues.is_empty(),
+        error_details,
+        auto_fix_available: !broken_symlinks.is_empty(),
         is_healthy,
     })
 }

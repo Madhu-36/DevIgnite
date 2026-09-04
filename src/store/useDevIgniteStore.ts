@@ -12,9 +12,12 @@ export interface Runtime {
 }
 
 interface DiagnosticReport {
-  path_collisions: string[];
-  broken_symlinks: string[];
-  permission_issues: string[];
+  symlink_healthy: boolean;
+  symlink_target: string | null;
+  devignite_in_path: boolean;
+  permissions_ok: boolean;
+  error_details: string[];
+  auto_fix_available: boolean;
   is_healthy: boolean;
 }
 
