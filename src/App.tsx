@@ -41,6 +41,13 @@ function App() {
           <div className="space-y-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold text-gray-300">Installed Runtimes</h2>
+              <button 
+                onClick={() => fetchRuntimes()}
+                disabled={isLoading}
+                className="text-sm text-blue-400 hover:text-blue-300 disabled:opacity-50"
+              >
+                Refresh
+              </button>
             </div>
             
             <div className="bg-gray-800 p-4 rounded-lg flex space-x-3 items-center shadow-sm border border-gray-700">
