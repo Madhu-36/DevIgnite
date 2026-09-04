@@ -41,71 +41,77 @@ export const useDevIgniteStore = create<DevIgniteState>((set, get) => ({
   setErrorMessage: (msg) => set({ errorMessage: msg }),
 
   fetchRuntimes: async () => {
-    set({ isLoading: true });
+    set({ isLoading: true, errorMessage: null });
     try {
-      const runtimes = await invoke<Runtime[]>('get_installed_runtimes');
+      const runtimes: Runtime[] = await invoke('get_installed_runtimes');
       set({ runtimes });
     } catch (error) {
       console.error('Failed to fetch runtimes', error);
+      set({ errorMessage: String(error) });
     } finally {
       set({ isLoading: false });
     }
   },
 
   installRuntime: async (name, version) => {
-    set({ isLoading: true });
+    set({ isLoading: true, errorMessage: null });
     try {
       await invoke('install_runtime', { name, version });
-      await get().fetchRuntimes();
+      get().fetchRuntimes();
     } catch (error) {
       console.error('Failed to install runtime', error);
+      set({ errorMessage: String(error) });
     } finally {
       set({ isLoading: false });
     }
   },
 
   switchVersion: async (name, version) => {
-    set({ isLoading: true });
+    set({ isLoading: true, errorMessage: null });
     try {
       await invoke('switch_version', { name, version });
-      await get().fetchRuntimes();
+      get().fetchRuntimes();
     } catch (error) {
       console.error('Failed to switch version', error);
+      set({ errorMessage: String(error) });
     } finally {
       set({ isLoading: false });
     }
   },
 
   uninstallRuntime: async (name, version) => {
-    set({ isLoading: true });
+    set({ isLoading: true, errorMessage: null });
     try {
       await invoke('uninstall_runtime', { name, version });
-      await get().fetchRuntimes();
+      get().fetchRuntimes();
     } catch (error) {
       console.error('Failed to uninstall runtime', error);
+      set({ errorMessage: String(error) });
     } finally {
       set({ isLoading: false });
     }
   },
 
   runDiagnostics: async () => {
-    set({ isLoading: true });
+    set({ isLoading: true, errorMessage: null });
     try {
-      const diagnostics = await invoke<DiagnosticReport>('run_diagnostics_cmd');
+      const diagnostics: DiagnosticReport = await invoke('run_diagnostics_cmd');
       set({ diagnostics });
     } catch (error) {
       console.error('Failed to run diagnostics', error);
+      set({ errorMessage: String(error) });
     } finally {
       set({ isLoading: false });
     }
   },
 
   clearCache: async () => {
-    set({ isLoading: true });
+    set({ isLoading: true, errorMessage: null });
     try {
       await invoke('clear_cache');
     } catch (error) {
       console.error('Failed to clear cache', error);
+      set({ errorMessage: String(error) });
     } finally {
       set({ isLoading: false });
     }
