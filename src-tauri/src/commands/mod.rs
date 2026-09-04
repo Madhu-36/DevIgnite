@@ -132,6 +132,16 @@ pub fn get_system_config(key: String, state: State<'_, DbState>) -> Result<Strin
 }
 
 #[tauri::command]
+pub fn set_system_config(key: String, value: String, state: State<'_, DbState>) -> Result<()> {
+    let conn = state.conn.lock().map_err(|e| crate::error::AppError::Unknown(anyhow::anyhow!("Mutex poisoned: {}", e)))?;
+    conn.execute(
+        "INSERT INTO system_config (key, value) VALUES (?1, ?2) ON CONFLICT(key) DO UPDATE SET value=excluded.value",
+        rusqlite::params![key, value],
+    )?;
+    Ok(())
+}
+
+#[tauri::command]
 pub fn run_diagnostics_cmd() -> Result<DiagnosticReport> {
     let bin_dir = directories::UserDirs::new()
         .map(|dirs| dirs.home_dir().join(".devignite").join("bin"))
