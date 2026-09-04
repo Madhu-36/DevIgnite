@@ -124,6 +124,14 @@ pub fn uninstall_runtime(name: String, version: String, state: State<'_, DbState
 }
 
 #[tauri::command]
+pub fn get_system_config(key: String, state: State<'_, DbState>) -> Result<String> {
+    let conn = state.conn.lock().map_err(|e| crate::error::AppError::Unknown(anyhow::anyhow!("Mutex poisoned: {}", e)))?;
+    let mut stmt = conn.prepare("SELECT value FROM system_config WHERE key = ?1")?;
+    let value: String = stmt.query_row(rusqlite::params![key], |row| row.get(0)).unwrap_or_default();
+    Ok(value)
+}
+
+#[tauri::command]
 pub fn run_diagnostics_cmd() -> Result<DiagnosticReport> {
     let bin_dir = directories::UserDirs::new()
         .map(|dirs| dirs.home_dir().join(".devignite").join("bin"))
