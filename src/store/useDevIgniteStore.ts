@@ -22,6 +22,8 @@ interface DevIgniteState {
   runtimes: Runtime[];
   diagnostics: DiagnosticReport | null;
   isLoading: boolean;
+  errorMessage: string | null;
+  setErrorMessage: (msg: string | null) => void;
   fetchRuntimes: () => Promise<void>;
   installRuntime: (name: string, version: string) => Promise<void>;
   switchVersion: (name: string, version: string) => Promise<void>;
@@ -34,6 +36,9 @@ export const useDevIgniteStore = create<DevIgniteState>((set, get) => ({
   runtimes: [],
   diagnostics: null,
   isLoading: false,
+  errorMessage: null,
+  
+  setErrorMessage: (msg) => set({ errorMessage: msg }),
 
   fetchRuntimes: async () => {
     set({ isLoading: true });
