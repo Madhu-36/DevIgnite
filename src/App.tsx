@@ -5,7 +5,7 @@ import { DoctorPanel } from './components/DoctorPanel';
 import { Layers } from 'lucide-react';
 
 function App() {
-  const { runtimes, fetchRuntimes, isLoading } = useDevIgniteStore();
+  const { runtimes, fetchRuntimes, isLoading, errorMessage, setErrorMessage } = useDevIgniteStore();
 
   useEffect(() => {
     fetchRuntimes();
@@ -27,6 +27,15 @@ function App() {
             Clear Cache
           </button>
         </header>
+
+        {errorMessage && (
+          <div className="bg-red-900/40 border border-red-800 text-red-200 p-4 rounded-md flex justify-between items-center">
+            <span>{errorMessage}</span>
+            <button onClick={() => setErrorMessage(null)} className="text-red-400 hover:text-red-300">
+              ✕
+            </button>
+          </div>
+        )}
 
         <main className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-6">
