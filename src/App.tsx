@@ -14,9 +14,18 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 p-8 font-sans">
       <div className="max-w-4xl mx-auto space-y-8">
-        <header className="flex items-center space-x-3 border-b border-gray-800 pb-6">
-          <Layers className="w-8 h-8 text-blue-500" />
-          <h1 className="text-3xl font-bold tracking-tight">DevIgnite</h1>
+        <header className="flex items-center justify-between border-b border-gray-800 pb-6">
+          <div className="flex items-center space-x-3">
+            <Layers className="w-8 h-8 text-blue-500" />
+            <h1 className="text-3xl font-bold tracking-tight">DevIgnite</h1>
+          </div>
+          <button
+            onClick={() => useDevIgniteStore.getState().clearCache()}
+            disabled={isLoading}
+            className="px-3 py-1.5 border border-red-800 text-red-400 hover:bg-red-900/30 rounded-md text-sm transition-colors disabled:opacity-50"
+          >
+            Clear Cache
+          </button>
         </header>
 
         <main className="grid grid-cols-1 md:grid-cols-2 gap-8">
