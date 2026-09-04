@@ -142,6 +142,20 @@ pub fn set_system_config(key: String, value: String, state: State<'_, DbState>) 
 }
 
 #[tauri::command]
+pub fn clear_cache() -> Result<()> {
+    let home_dir = directories::UserDirs::new()
+        .map(|dirs| dirs.home_dir().to_path_buf())
+        .ok_or_else(|| crate::error::AppError::Installation("No home directory found".into()))?;
+        
+    let cache_dir = home_dir.join(".devignite").join("cache");
+    if cache_dir.exists() {
+        std::fs::remove_dir_all(&cache_dir)?;
+        std::fs::create_dir_all(&cache_dir)?;
+    }
+    Ok(())
+}
+
+#[tauri::command]
 pub fn run_diagnostics_cmd() -> Result<DiagnosticReport> {
     let bin_dir = directories::UserDirs::new()
         .map(|dirs| dirs.home_dir().join(".devignite").join("bin"))

@@ -31,6 +31,7 @@ pub fn run() {
             commands::uninstall_runtime,
             commands::get_system_config,
             commands::set_system_config,
+            commands::clear_cache,
             commands::run_diagnostics_cmd
         ])
         .run(tauri::generate_context!())
