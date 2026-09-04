@@ -27,6 +27,7 @@ interface DevIgniteState {
   switchVersion: (name: string, version: string) => Promise<void>;
   uninstallRuntime: (name: string, version: string) => Promise<void>;
   runDiagnostics: () => Promise<void>;
+  clearCache: () => Promise<void>;
 }
 
 export const useDevIgniteStore = create<DevIgniteState>((set, get) => ({
@@ -89,6 +90,17 @@ export const useDevIgniteStore = create<DevIgniteState>((set, get) => ({
       set({ diagnostics });
     } catch (error) {
       console.error('Failed to run diagnostics', error);
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  clearCache: async () => {
+    set({ isLoading: true });
+    try {
+      await invoke('clear_cache');
+    } catch (error) {
+      console.error('Failed to clear cache', error);
     } finally {
       set({ isLoading: false });
     }
