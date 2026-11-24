@@ -89,3 +89,23 @@ pub fn broadcast_path_change(bin_dir: &Path) -> Result<()> {
 
     Ok(())
 }
+
+pub fn detect_shell_profiles(home_dir: &Path) -> Vec<PathBuf> {
+    let candidates = [
+        ".zshrc",
+        ".bashrc",
+        ".bash_profile",
+        ".profile",
+        ".config/fish/config.fish",
+    ];
+
+    candidates
+        .iter()
+        .map(|name| home_dir.join(name))
+        .filter(|p| p.exists())
+        .collect()
+}
+
+pub fn generate_shell_export_snippet(bin_dir: &Path) -> String {
+    format!("\n# DevIgnite Sandboxed Bin Directory\nexport PATH=\"{}:$PATH\"\n", bin_dir.display())
+}
