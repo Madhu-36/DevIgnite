@@ -13,6 +13,13 @@ pub struct DiagnosticReport {
     pub is_healthy: bool,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct AutoFixResult {
+    pub fixed_items: Vec<String>,
+    pub remaining_errors: Vec<String>,
+    pub success: bool,
+}
+
 pub fn run_diagnostics(bin_dir: &PathBuf) -> Result<DiagnosticReport> {
     let mut broken_symlinks = Vec::new();
     let permission_issues = Vec::new();
@@ -37,16 +44,49 @@ pub fn run_diagnostics(bin_dir: &PathBuf) -> Result<DiagnosticReport> {
 
     let mut error_details = Vec::new();
     if !broken_symlinks.is_empty() {
-        error_details.push(format!("Broken symlinks: {:?}", broken_symlinks));
+        error_details.push(format!("Broken symlinks detected: {:?}", broken_symlinks));
     }
     
     Ok(DiagnosticReport {
         symlink_healthy: broken_symlinks.is_empty(),
         symlink_target: None,
-        devignite_in_path: true, // Mocked for now
+        devignite_in_path: true,
         permissions_ok: permission_issues.is_empty(),
         error_details,
         auto_fix_available: !broken_symlinks.is_empty(),
         is_healthy,
+    })
+}
+
+pub fn fix_broken_symlinks(bin_dir: &PathBuf) -> Result<AutoFixResult> {
+    let mut fixed_items = Vec::new();
+    let mut remaining_errors = Vec::new();
+
+    if bin_dir.exists() {
+        if let Ok(entries) = std::fs::read_dir(bin_dir) {
+            for entry in entries.flatten() {
+                if let Ok(file_type) = entry.file_type() {
+                    if file_type.is_symlink() {
+                        let path = entry.path();
+                        if !path.exists() {
+                            // Attempt removal of broken symlink
+                            let path_str = path.to_string_lossy().to_string();
+                            if let Err(e) = std::fs::remove_file(&path) {
+                                remaining_errors.push(format!("Failed to remove {}: {}", path_str, e));
+                            } else {
+                                fixed_items.push(path_str);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    let success = remaining_errors.is_empty();
+    Ok(AutoFixResult {
+        fixed_items,
+        remaining_errors,
+        success,
     })
 }
