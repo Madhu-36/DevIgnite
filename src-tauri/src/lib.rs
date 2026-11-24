@@ -32,7 +32,8 @@ pub fn run() {
             commands::get_system_config,
             commands::set_system_config,
             commands::clear_cache,
-            commands::run_diagnostics_cmd
+            commands::run_diagnostics_cmd,
+            commands::auto_fix_diagnostics_cmd
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

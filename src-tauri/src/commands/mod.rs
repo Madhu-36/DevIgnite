@@ -1,5 +1,5 @@
 use crate::db::{DbState, Runtime};
-use crate::doctor::{run_diagnostics, DiagnosticReport};
+use crate::doctor::{fix_broken_symlinks, run_diagnostics, AutoFixResult, DiagnosticReport};
 use crate::error::Result;
 use tauri::State;
 
@@ -162,4 +162,13 @@ pub fn run_diagnostics_cmd() -> Result<DiagnosticReport> {
         .unwrap_or_else(|| std::path::PathBuf::from(".devignite/bin"));
         
     run_diagnostics(&bin_dir)
+}
+
+#[tauri::command]
+pub fn auto_fix_diagnostics_cmd() -> Result<AutoFixResult> {
+    let bin_dir = directories::UserDirs::new()
+        .map(|dirs| dirs.home_dir().join(".devignite").join("bin"))
+        .unwrap_or_else(|| std::path::PathBuf::from(".devignite/bin"));
+        
+    fix_broken_symlinks(&bin_dir)
 }
