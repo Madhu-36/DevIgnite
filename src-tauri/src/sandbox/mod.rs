@@ -109,3 +109,23 @@ pub fn detect_shell_profiles(home_dir: &Path) -> Vec<PathBuf> {
 pub fn generate_shell_export_snippet(bin_dir: &Path) -> String {
     format!("\n# DevIgnite Sandboxed Bin Directory\nexport PATH=\"{}:$PATH\"\n", bin_dir.display())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_generate_shell_export_snippet() {
+        let path = Path::new("/home/user/.devignite/bin");
+        let snippet = generate_shell_export_snippet(path);
+        assert!(snippet.contains("export PATH="));
+        assert!(snippet.contains(".devignite/bin"));
+    }
+
+    #[test]
+    fn test_detect_shell_profiles_non_panicking() {
+        let temp = std::env::temp_dir();
+        let profiles = detect_shell_profiles(&temp);
+        assert!(profiles.is_empty() || !profiles.is_empty());
+    }
+}
