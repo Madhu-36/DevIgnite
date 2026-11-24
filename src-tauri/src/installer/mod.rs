@@ -32,6 +32,15 @@ impl DownloadProgress {
     }
 }
 
+pub fn get_known_checksum(tool: &str, version: &str, os: &str, arch: &str) -> Option<&'static str> {
+    match (tool, version, os, arch) {
+        ("node", "20.11.0", "windows", "x64") => Some("e76bcfdbe5062a74c43ba7db3bc61b2e65c92cda19c0b115456c6f78f9f68882"),
+        ("node", "18.19.0", "windows", "x64") => Some("8272ea87a7164ff50d7e8286a073f15c48bbfb17781b490f237ef1b423f03b5f"),
+        ("go", "1.22.0", "windows", "amd64") => Some("f61dc7824147076a582fae2e28a6fbe857ab349f4c3983286f91ecba3a2e3797"),
+        _ => None,
+    }
+}
+
 pub async fn download_and_verify(
     url: &str,
     output_path: &PathBuf,
