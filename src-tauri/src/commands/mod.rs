@@ -172,3 +172,41 @@ pub fn auto_fix_diagnostics_cmd() -> Result<AutoFixResult> {
         
     fix_broken_symlinks(&bin_dir)
 }
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+pub struct PathStatus {
+    pub devignite_in_path: bool,
+    pub path_entries: Vec<String>,
+    pub potential_collisions: Vec<String>,
+}
+
+#[tauri::command]
+pub fn get_system_path_status() -> Result<PathStatus> {
+    let home_dir = directories::UserDirs::new()
+        .map(|dirs| dirs.home_dir().to_path_buf())
+        .ok_or_else(|| crate::error::AppError::Installation("No home directory found".into()))?;
+    let bin_dir_str = home_dir.join(".devignite").join("bin").to_string_lossy().to_string();
+
+    let path_var = std::env::var("PATH").unwrap_or_default();
+    let entries: Vec<String> = std::env::split_paths(&path_var)
+        .map(|p| p.to_string_lossy().to_string())
+        .collect();
+
+    let devignite_in_path = entries.iter().any(|e| e.contains(&bin_dir_str));
+    let mut potential_collisions = Vec::new();
+
+    for entry in &entries {
+        if !entry.contains(".devignite") {
+            let lower = entry.to_lowercase();
+            if lower.contains("nodejs") || lower.contains("python") || lower.contains("go\\bin") || lower.contains("cargo\\bin") {
+                potential_collisions.push(entry.clone());
+            }
+        }
+    }
+
+    Ok(PathStatus {
+        devignite_in_path,
+        path_entries: entries,
+        potential_collisions,
+    })
+}
