@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal } from './Modal';
 import { invoke } from '@tauri-apps/api/core';
-import { Settings, Trash2, Download, Save } from 'lucide-react';
+import { Trash2, Download, Save } from 'lucide-react';
 import { useDevIgniteStore } from '../store/useDevIgniteStore';
 
 interface SettingsModalProps {

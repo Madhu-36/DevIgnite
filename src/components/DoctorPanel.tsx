@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Activity, AlertTriangle, CheckCircle, ShieldAlert, Wrench, RefreshCw, Check, X } from 'lucide-react';
+import { Activity, CheckCircle, ShieldAlert, Wrench, RefreshCw, Check, X } from 'lucide-react';
 import { useDevIgniteStore } from '../store/useDevIgniteStore';
 import { invoke } from '@tauri-apps/api/core';
 import { AutoFixResult } from '../types';
