@@ -210,3 +210,19 @@ pub fn get_system_path_status() -> Result<PathStatus> {
         potential_collisions,
     })
 }
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+pub struct ConfigExportPayload {
+    pub export_version: u32,
+    pub runtimes: Vec<Runtime>,
+}
+
+#[tauri::command]
+pub fn export_runtimes_config(state: State<'_, DbState>) -> Result<String> {
+    let runtimes = get_installed_runtimes(state)?;
+    let payload = ConfigExportPayload {
+        export_version: 1,
+        runtimes,
+    };
+    serde_json::to_string_pretty(&payload).map_err(|e| crate::error::AppError::Unknown(e.into()))
+}
