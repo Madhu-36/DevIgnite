@@ -1,10 +1,36 @@
 use crate::error::{AppError, Result};
 use futures_util::StreamExt;
 use reqwest::Client;
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::path::PathBuf;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct DownloadProgress {
+    pub tool_name: String,
+    pub version: String,
+    pub downloaded_bytes: u64,
+    pub total_bytes: Option<u64>,
+    pub percentage: f32,
+}
+
+impl DownloadProgress {
+    pub fn new(tool_name: &str, version: &str, downloaded_bytes: u64, total_bytes: Option<u64>) -> Self {
+        let percentage = match total_bytes {
+            Some(total) if total > 0 => ((downloaded_bytes as f64 / total as f64) * 100.0) as f32,
+            _ => 0.0,
+        };
+        Self {
+            tool_name: tool_name.to_string(),
+            version: version.to_string(),
+            downloaded_bytes,
+            total_bytes,
+            percentage,
+        }
+    }
+}
 
 pub async fn download_and_verify(
     url: &str,
