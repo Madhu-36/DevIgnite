@@ -32,11 +32,7 @@ pub fn get_installed_runtimes(state: State<'_, DbState>) -> Result<Vec<Runtime>>
 
 #[tauri::command]
 pub async fn install_runtime(name: String, version: String, state: State<'_, DbState>) -> Result<()> {
-    let home_dir = directories::UserDirs::new()
-        .map(|dirs| dirs.home_dir().to_path_buf())
-        .ok_or_else(|| crate::error::AppError::Installation("No home directory found".into()))?;
-        
-    let devignite_dir = home_dir.join(".devignite");
+    let devignite_dir = crate::cli::get_devignite_root();
     let cache_dir = devignite_dir.join("cache");
     let runtime_dir = devignite_dir.join("runtimes").join(&name).join(&version);
     
@@ -70,11 +66,7 @@ pub async fn install_runtime(name: String, version: String, state: State<'_, DbS
 
 #[tauri::command]
 pub fn switch_version(name: String, version: String, state: State<'_, DbState>) -> Result<()> {
-    let home_dir = directories::UserDirs::new()
-        .map(|dirs| dirs.home_dir().to_path_buf())
-        .ok_or_else(|| crate::error::AppError::Installation("No home directory found".into()))?;
-        
-    let devignite_dir = home_dir.join(".devignite");
+    let devignite_dir = crate::cli::get_devignite_root();
     let bin_dir = devignite_dir.join("bin");
     let runtime_dir = devignite_dir.join("runtimes").join(&name).join(&version);
     
@@ -103,11 +95,7 @@ pub fn switch_version(name: String, version: String, state: State<'_, DbState>) 
 
 #[tauri::command]
 pub fn uninstall_runtime(name: String, version: String, state: State<'_, DbState>) -> Result<()> {
-    let home_dir = directories::UserDirs::new()
-        .map(|dirs| dirs.home_dir().to_path_buf())
-        .ok_or_else(|| crate::error::AppError::Installation("No home directory found".into()))?;
-        
-    let devignite_dir = home_dir.join(".devignite");
+    let devignite_dir = crate::cli::get_devignite_root();
     let runtime_dir = devignite_dir.join("runtimes").join(&name).join(&version);
     
     if runtime_dir.exists() {
@@ -143,11 +131,8 @@ pub fn set_system_config(key: String, value: String, state: State<'_, DbState>) 
 
 #[tauri::command]
 pub fn clear_cache() -> Result<()> {
-    let home_dir = directories::UserDirs::new()
-        .map(|dirs| dirs.home_dir().to_path_buf())
-        .ok_or_else(|| crate::error::AppError::Installation("No home directory found".into()))?;
-        
-    let cache_dir = home_dir.join(".devignite").join("cache");
+    let devignite_dir = crate::cli::get_devignite_root();
+    let cache_dir = devignite_dir.join("cache");
     if cache_dir.exists() {
         std::fs::remove_dir_all(&cache_dir)?;
         std::fs::create_dir_all(&cache_dir)?;
@@ -157,19 +142,13 @@ pub fn clear_cache() -> Result<()> {
 
 #[tauri::command]
 pub fn run_diagnostics_cmd() -> Result<DiagnosticReport> {
-    let bin_dir = directories::UserDirs::new()
-        .map(|dirs| dirs.home_dir().join(".devignite").join("bin"))
-        .unwrap_or_else(|| std::path::PathBuf::from(".devignite/bin"));
-        
+    let bin_dir = crate::cli::get_devignite_root().join("bin");
     run_diagnostics(&bin_dir)
 }
 
 #[tauri::command]
 pub fn auto_fix_diagnostics_cmd() -> Result<AutoFixResult> {
-    let bin_dir = directories::UserDirs::new()
-        .map(|dirs| dirs.home_dir().join(".devignite").join("bin"))
-        .unwrap_or_else(|| std::path::PathBuf::from(".devignite/bin"));
-        
+    let bin_dir = crate::cli::get_devignite_root().join("bin");
     fix_broken_symlinks(&bin_dir)
 }
 
@@ -182,10 +161,7 @@ pub struct PathStatus {
 
 #[tauri::command]
 pub fn get_system_path_status() -> Result<PathStatus> {
-    let home_dir = directories::UserDirs::new()
-        .map(|dirs| dirs.home_dir().to_path_buf())
-        .ok_or_else(|| crate::error::AppError::Installation("No home directory found".into()))?;
-    let bin_dir_str = home_dir.join(".devignite").join("bin").to_string_lossy().to_string();
+    let bin_dir_str = crate::cli::get_devignite_root().join("bin").to_string_lossy().to_string();
 
     let path_var = std::env::var("PATH").unwrap_or_default();
     let entries: Vec<String> = std::env::split_paths(&path_var)
