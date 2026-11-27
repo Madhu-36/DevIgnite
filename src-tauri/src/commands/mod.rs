@@ -87,6 +87,9 @@ pub fn switch_version(name: String, version: String, state: State<'_, DbState>) 
             "UPDATE installed_runtimes SET is_active = 1 WHERE tool_name = ?1 AND version = ?2",
             rusqlite::params![name, version],
         )?;
+
+        // Log switch history
+        let _ = crate::db::log_switch(&conn, &name, &version);
     } else {
         return Err(crate::error::AppError::Installation("Runtime version not found locally".into()));
     }
@@ -208,4 +211,34 @@ pub fn export_runtimes_config(state: State<'_, DbState>) -> Result<String> {
 pub fn list_available_remote_versions(tool: Option<String>) -> Result<Vec<RemoteVersion>> {
     let tool_name = tool.unwrap_or_else(|| "all".into());
     Ok(get_catalog_for_tool(&tool_name))
+}
+
+#[tauri::command]
+pub fn get_disk_usage_stats() -> Result<crate::db::DiskUsageStats> {
+    let devignite_dir = crate::cli::get_devignite_root();
+    Ok(crate::db::get_disk_usage(&devignite_dir))
+}
+
+#[tauri::command]
+pub fn get_switch_history(limit: Option<i64>, state: State<'_, DbState>) -> Result<Vec<crate::db::SwitchHistoryEntry>> {
+    let conn = state.conn.lock().map_err(|e| crate::error::AppError::Unknown(anyhow::anyhow!("Mutex poisoned: {}", e)))?;
+    let max_limit = limit.unwrap_or(20);
+    let mut stmt = conn.prepare("SELECT id, tool_name, version, switched_at FROM runtime_switch_history ORDER BY id DESC LIMIT ?1")?;
+    
+    let iter = stmt.query_map(rusqlite::params![max_limit], |row| {
+        Ok(crate::db::SwitchHistoryEntry {
+            id: row.get(0)?,
+            tool_name: row.get(1)?,
+            version: row.get(2)?,
+            switched_at: row.get(3)?,
+        })
+    })?;
+
+    let mut history = Vec::new();
+    for entry in iter {
+        if let Ok(item) = entry {
+            history.push(item);
+        }
+    }
+    Ok(history)
 }
