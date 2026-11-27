@@ -45,3 +45,25 @@ export interface ToastMessage {
   type: 'success' | 'error' | 'info';
   message: string;
 }
+
+export interface DiskUsageStats {
+  runtimes_bytes: number;
+  cache_bytes: number;
+  db_bytes: number;
+  total_bytes: number;
+}
+
+export interface RemoteVersion {
+  tool_name: string;
+  version: string;
+  lts: string | null;
+  release_date: string | null;
+  download_url: string;
+}
+
+export interface SwitchHistoryEntry {
+  id: number;
+  tool_name: string;
+  version: string;
+  switched_at: string;
+}
