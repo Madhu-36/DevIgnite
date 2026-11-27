@@ -25,6 +25,45 @@ pub struct SwitchHistoryEntry {
     pub switched_at: String,
 }
 
+#[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
+pub struct DiskUsageStats {
+    pub runtimes_bytes: u64,
+    pub cache_bytes: u64,
+    pub db_bytes: u64,
+    pub total_bytes: u64,
+}
+
+pub fn calculate_dir_size(path: &std::path::Path) -> u64 {
+    let mut total = 0;
+    if let Ok(entries) = std::fs::read_dir(path) {
+        for entry in entries.flatten() {
+            if let Ok(meta) = entry.metadata() {
+                if meta.is_dir() {
+                    total += calculate_dir_size(&entry.path());
+                } else {
+                    total += meta.len();
+                }
+            }
+        }
+    }
+    total
+}
+
+pub fn get_disk_usage(root: &std::path::Path) -> DiskUsageStats {
+    let runtimes_bytes = calculate_dir_size(&root.join("runtimes"));
+    let cache_bytes = calculate_dir_size(&root.join("cache"));
+    let db_bytes = std::fs::metadata(root.join("devignite.db"))
+        .map(|m| m.len())
+        .unwrap_or(0);
+
+    DiskUsageStats {
+        runtimes_bytes,
+        cache_bytes,
+        db_bytes,
+        total_bytes: runtimes_bytes + cache_bytes + db_bytes,
+    }
+}
+
 pub fn run_migrations(conn: &Connection) -> Result<()> {
     conn.execute(
         "CREATE TABLE IF NOT EXISTS schema_migrations (
