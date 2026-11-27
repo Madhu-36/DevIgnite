@@ -65,3 +65,50 @@ ENVIRONMENT:
 "#
     );
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_cli_args_help() {
+        let args = vec!["devignite".into(), "--help".into()];
+        assert_eq!(parse_cli_args(&args), CliCommand::Help);
+
+        let args_short = vec!["devignite".into(), "-h".into()];
+        assert_eq!(parse_cli_args(&args_short), CliCommand::Help);
+    }
+
+    #[test]
+    fn test_parse_cli_args_list() {
+        let args = vec!["devignite".into(), "list".into()];
+        assert_eq!(parse_cli_args(&args), CliCommand::List);
+
+        let args_ls = vec!["devignite".into(), "ls".into()];
+        assert_eq!(parse_cli_args(&args_ls), CliCommand::List);
+    }
+
+    #[test]
+    fn test_parse_cli_args_use() {
+        let args = vec!["devignite".into(), "use".into(), "Node".into(), "20.11.0".into()];
+        assert_eq!(
+            parse_cli_args(&args),
+            CliCommand::Use {
+                tool: "node".into(),
+                version: "20.11.0".into(),
+            }
+        );
+    }
+
+    #[test]
+    fn test_parse_cli_args_empty_runs_gui() {
+        let args = vec!["devignite".into()];
+        assert_eq!(parse_cli_args(&args), CliCommand::RunGui);
+    }
+
+    #[test]
+    fn test_get_devignite_root_default() {
+        let root = get_devignite_root();
+        assert!(root.to_string_lossy().contains(".devignite"));
+    }
+}
