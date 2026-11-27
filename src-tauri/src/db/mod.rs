@@ -158,7 +158,33 @@ mod tests {
         let count: i64 = conn
             .query_row("SELECT count(*) FROM schema_migrations", [], |row| row.get(0))
             .unwrap();
-        assert_eq!(count, 1);
+        assert_eq!(count, 2);
+    }
+
+    #[test]
+    fn test_log_switch_history() {
+        let conn = Connection::open_in_memory().unwrap();
+        run_migrations(&conn).unwrap();
+
+        log_switch(&conn, "node", "20.11.0").unwrap();
+        log_switch(&conn, "python", "3.12.1").unwrap();
+
+        let count: i64 = conn
+            .query_row("SELECT count(*) FROM runtime_switch_history", [], |row| row.get(0))
+            .unwrap();
+        assert_eq!(count, 2);
+    }
+
+    #[test]
+    fn test_disk_usage_calculation_temp_dir() {
+        let temp_dir = std::env::temp_dir().join("devignite_test_usage");
+        let _ = std::fs::create_dir_all(temp_dir.join("runtimes"));
+        let _ = std::fs::write(temp_dir.join("runtimes").join("dummy.bin"), b"12345678");
+
+        let stats = get_disk_usage(&temp_dir);
+        assert!(stats.runtimes_bytes >= 8);
+
+        let _ = std::fs::remove_dir_all(temp_dir);
     }
 
     #[test]
