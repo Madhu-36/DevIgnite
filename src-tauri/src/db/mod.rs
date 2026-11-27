@@ -17,6 +17,14 @@ pub struct Runtime {
     pub installed_at: String,
 }
 
+#[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
+pub struct SwitchHistoryEntry {
+    pub id: i64,
+    pub tool_name: String,
+    pub version: String,
+    pub switched_at: String,
+}
+
 pub fn run_migrations(conn: &Connection) -> Result<()> {
     conn.execute(
         "CREATE TABLE IF NOT EXISTS schema_migrations (
@@ -59,6 +67,30 @@ pub fn run_migrations(conn: &Connection) -> Result<()> {
         [],
     )?;
 
+    // Migration v2: runtime_switch_history
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS runtime_switch_history (
+            id INTEGER PRIMARY KEY,
+            tool_name TEXT NOT NULL,
+            version TEXT NOT NULL,
+            switched_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )",
+        [],
+    )?;
+
+    conn.execute(
+        "INSERT OR IGNORE INTO schema_migrations (version) VALUES (2)",
+        [],
+    )?;
+
+    Ok(())
+}
+
+pub fn log_switch(conn: &Connection, tool: &str, version: &str) -> Result<()> {
+    conn.execute(
+        "INSERT INTO runtime_switch_history (tool_name, version) VALUES (?1, ?2)",
+        rusqlite::params![tool, version],
+    )?;
     Ok(())
 }
 
