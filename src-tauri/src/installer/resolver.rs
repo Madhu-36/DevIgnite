@@ -48,3 +48,29 @@ pub fn get_node_catalog() -> Vec<RemoteVersion> {
         },
     ]
 }
+
+pub fn get_python_catalog() -> Vec<RemoteVersion> {
+    vec![
+        RemoteVersion {
+            tool_name: "python".into(),
+            version: "3.12.1".into(),
+            lts: Some("Stable".into()),
+            release_date: Some("2023-12-08".into()),
+            download_url: "https://github.com/indygreg/python-build-standalone/releases/download/20240224/cpython-3.12.1+20240224-x86_64-pc-windows-msvc-shared-install_only.tar.gz".into(),
+        },
+        RemoteVersion {
+            tool_name: "python".into(),
+            version: "3.11.8".into(),
+            lts: Some("Security".into()),
+            release_date: Some("2024-02-06".into()),
+            download_url: "https://github.com/indygreg/python-build-standalone/releases/download/20240224/cpython-3.11.8+20240224-x86_64-pc-windows-msvc-shared-install_only.tar.gz".into(),
+        },
+        RemoteVersion {
+            tool_name: "python".into(),
+            version: "3.10.13".into(),
+            lts: Some("Security".into()),
+            release_date: Some("2023-08-25".into()),
+            download_url: "https://github.com/indygreg/python-build-standalone/releases/download/20240224/cpython-3.10.13+20240224-x86_64-pc-windows-msvc-shared-install_only.tar.gz".into(),
+        },
+    ]
+}
