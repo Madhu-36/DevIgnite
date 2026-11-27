@@ -74,3 +74,29 @@ pub fn get_python_catalog() -> Vec<RemoteVersion> {
         },
     ]
 }
+
+pub fn get_go_catalog() -> Vec<RemoteVersion> {
+    vec![
+        RemoteVersion {
+            tool_name: "go".into(),
+            version: "1.22.0".into(),
+            lts: Some("Current".into()),
+            release_date: Some("2024-02-06".into()),
+            download_url: "https://golang.org/dl/go1.22.0.windows-amd64.zip".into(),
+        },
+        RemoteVersion {
+            tool_name: "go".into(),
+            version: "1.21.6".into(),
+            lts: Some("Stable".into()),
+            release_date: Some("2024-01-09".into()),
+            download_url: "https://golang.org/dl/go1.21.6.windows-amd64.zip".into(),
+        },
+        RemoteVersion {
+            tool_name: "go".into(),
+            version: "1.20.13".into(),
+            lts: Some("Maintenance".into()),
+            release_date: Some("2024-01-09".into()),
+            download_url: "https://golang.org/dl/go1.20.13.windows-amd64.zip".into(),
+        },
+    ]
+}
