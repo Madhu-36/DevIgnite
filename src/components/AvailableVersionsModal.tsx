@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Modal } from './Modal';
 import { invoke } from '@tauri-apps/api/core';
-import { DownloadCloud, Tag, Calendar, Plus } from 'lucide-react';
+import { Tag, Calendar, Plus } from 'lucide-react';
 import { RemoteVersion } from '../types';
 import { useDevIgniteStore } from '../store/useDevIgniteStore';
 

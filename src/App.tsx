@@ -4,9 +4,13 @@ import { RuntimeCard } from './components/RuntimeCard';
 import { DoctorPanel } from './components/DoctorPanel';
 import { SearchBar } from './components/SearchBar';
 import { SettingsModal } from './components/SettingsModal';
+import { AvailableVersionsModal } from './components/AvailableVersionsModal';
+import { UsageHistoryModal } from './components/UsageHistoryModal';
+import { DiskUsageBar } from './components/DiskUsageBar';
+import { QuickStartGuide } from './components/QuickStartGuide';
 import { ToastContainer } from './components/Toast';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
-import { Layers, Settings, RefreshCw, PlusCircle, AlertCircle } from 'lucide-react';
+import { Layers, Settings, RefreshCw, PlusCircle, AlertCircle, Globe, History } from 'lucide-react';
 import { ToastMessage } from './types';
 
 function App() {
@@ -16,6 +20,8 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTool, setSelectedTool] = useState('all');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isCatalogOpen, setIsCatalogOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
   const [inputTool, setInputTool] = useState('');
@@ -60,7 +66,7 @@ function App() {
       addToast(`Installed ${inputTool} v${inputVersion}`, 'success');
       setInputTool('');
       setInputVersion('');
-    } catch (e) {
+    } catch {
       addToast(`Installation failed for ${inputTool}`, 'error');
     }
   };
@@ -85,7 +91,25 @@ function App() {
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <button
+              onClick={() => setIsCatalogOpen(true)}
+              className="flex items-center space-x-1.5 px-3 py-2 text-xs font-medium text-gray-300 hover:text-white bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg transition-colors"
+              title="Remote Catalog"
+            >
+              <Globe size={15} className="text-blue-400" />
+              <span className="hidden sm:inline">Browse Online</span>
+            </button>
+
+            <button
+              onClick={() => setIsHistoryOpen(true)}
+              className="flex items-center space-x-1.5 px-3 py-2 text-xs font-medium text-gray-300 hover:text-white bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg transition-colors"
+              title="Audit Log"
+            >
+              <History size={15} className="text-purple-400" />
+              <span className="hidden sm:inline">Switch Log</span>
+            </button>
+
             <button
               onClick={() => {
                 fetchRuntimes();
@@ -95,15 +119,15 @@ function App() {
               className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors border border-gray-800 disabled:opacity-50"
               title="Refresh (Ctrl+R)"
             >
-              <RefreshCw size={18} className={isLoading ? 'animate-spin' : ''} />
+              <RefreshCw size={17} className={isLoading ? 'animate-spin' : ''} />
             </button>
 
             <button
               onClick={() => setIsSettingsOpen(true)}
-              className="flex items-center space-x-2 px-3 py-2 text-xs font-medium text-gray-300 hover:text-white bg-gray-800/80 hover:bg-gray-800 border border-gray-700 rounded-lg transition-colors"
+              className="flex items-center space-x-1.5 px-3 py-2 text-xs font-medium text-gray-300 hover:text-white bg-gray-800/80 hover:bg-gray-800 border border-gray-700 rounded-lg transition-colors"
               title="Preferences (Ctrl+,)"
             >
-              <Settings size={16} />
+              <Settings size={15} />
               <span>Settings</span>
             </button>
           </div>
@@ -138,9 +162,17 @@ function App() {
 
             {/* Quick Install Bar */}
             <div className="bg-gray-900 border border-gray-800 p-4 rounded-xl shadow-sm space-y-3">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                Install New Runtime
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                  Install New Runtime
+                </p>
+                <button
+                  onClick={() => setIsCatalogOpen(true)}
+                  className="text-xs text-blue-400 hover:text-blue-300 font-medium"
+                >
+                  From Remote Catalog →
+                </button>
+              </div>
               <div className="flex space-x-2">
                 <input
                   type="text"
@@ -180,11 +212,14 @@ function App() {
             {/* Runtime Cards List */}
             <div>
               {filteredRuntimes.length === 0 ? (
-                <div className="bg-gray-900/60 border border-gray-800/80 rounded-xl p-8 text-center text-gray-400 space-y-2">
-                  <p className="text-sm font-medium">No matching runtimes found.</p>
-                  <p className="text-xs text-gray-500">
-                    Try searching for another version or install one using the form above.
-                  </p>
+                <div className="space-y-4">
+                  <div className="bg-gray-900/60 border border-gray-800/80 rounded-xl p-8 text-center text-gray-400 space-y-2">
+                    <p className="text-sm font-medium">No matching runtimes found.</p>
+                    <p className="text-xs text-gray-500">
+                      Install a version manually or pick a verified build from the catalog.
+                    </p>
+                  </div>
+                  <QuickStartGuide onOpenBrowse={() => setIsCatalogOpen(true)} />
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -196,14 +231,21 @@ function App() {
             </div>
           </div>
 
-          {/* Right Column: Health Diagnostics */}
+          {/* Right Column: Health Diagnostics & Storage */}
           <div className="lg:col-span-5 space-y-6">
             <DoctorPanel />
+            <DiskUsageBar />
           </div>
         </main>
       </div>
 
       <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+      <AvailableVersionsModal
+        isOpen={isCatalogOpen}
+        onClose={() => setIsCatalogOpen(false)}
+        onInstalled={(t, v) => addToast(`Installed ${t} v${v}`, 'success')}
+      />
+      <UsageHistoryModal isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} />
       <ToastContainer toasts={toasts} onDismiss={removeToast} />
     </div>
   );
