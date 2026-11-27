@@ -26,6 +26,8 @@ interface DevIgniteState {
   diagnostics: DiagnosticReport | null;
   isLoading: boolean;
   errorMessage: string | null;
+  theme: 'dark' | 'light';
+  toggleTheme: () => void;
   setErrorMessage: (msg: string | null) => void;
   fetchRuntimes: () => Promise<void>;
   installRuntime: (name: string, version: string) => Promise<void>;
@@ -40,7 +42,9 @@ export const useDevIgniteStore = create<DevIgniteState>((set, get) => ({
   diagnostics: null,
   isLoading: false,
   errorMessage: null,
+  theme: 'dark',
   
+  toggleTheme: () => set((state) => ({ theme: state.theme === 'dark' ? 'light' : 'dark' })),
   setErrorMessage: (msg) => set({ errorMessage: msg }),
 
   fetchRuntimes: async () => {
