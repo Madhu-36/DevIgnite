@@ -100,3 +100,38 @@ pub fn get_go_catalog() -> Vec<RemoteVersion> {
         },
     ]
 }
+
+pub fn get_rust_catalog() -> Vec<RemoteVersion> {
+    vec![
+        RemoteVersion {
+            tool_name: "rust".into(),
+            version: "1.76.0".into(),
+            lts: Some("Stable".into()),
+            release_date: Some("2024-02-08".into()),
+            download_url: "https://static.rust-lang.org/dist/rust-1.76.0-x86_64-pc-windows-msvc.tar.gz".into(),
+        },
+        RemoteVersion {
+            tool_name: "rust".into(),
+            version: "1.75.0".into(),
+            lts: Some("Stable".into()),
+            release_date: Some("2023-12-28".into()),
+            download_url: "https://static.rust-lang.org/dist/rust-1.75.0-x86_64-pc-windows-msvc.tar.gz".into(),
+        },
+    ]
+}
+
+pub fn get_catalog_for_tool(tool: &str) -> Vec<RemoteVersion> {
+    match tool.to_lowercase().as_str() {
+        "node" => get_node_catalog(),
+        "python" => get_python_catalog(),
+        "go" => get_go_catalog(),
+        "rust" => get_rust_catalog(),
+        _ => {
+            let mut all = get_node_catalog();
+            all.extend(get_python_catalog());
+            all.extend(get_go_catalog());
+            all.extend(get_rust_catalog());
+            all
+        }
+    }
+}
