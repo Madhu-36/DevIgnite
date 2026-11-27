@@ -1,3 +1,4 @@
+pub mod cli;
 pub mod commands;
 pub mod db;
 pub mod doctor;
@@ -6,14 +7,10 @@ pub mod installer;
 pub mod sandbox;
 
 use db::DbState;
-use directories::ProjectDirs;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let home_dir = directories::UserDirs::new()
-        .map(|dirs| dirs.home_dir().to_path_buf())
-        .expect("Could not find user home directory");
-    let devignite_dir = home_dir.join(".devignite");
+    let devignite_dir = cli::get_devignite_root();
     
     let db_path = devignite_dir.join("devignite.db");
     
