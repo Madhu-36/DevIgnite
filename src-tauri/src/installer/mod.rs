@@ -1,3 +1,5 @@
+pub mod resolver;
+
 use crate::error::{AppError, Result};
 use futures_util::StreamExt;
 use reqwest::Client;
