@@ -10,6 +10,7 @@ pub struct DiagnosticReport {
     pub permissions_ok: bool,
     pub error_details: Vec<String>,
     pub auto_fix_available: bool,
+    pub windows_developer_mode: bool,
     pub is_healthy: bool,
 }
 
@@ -46,6 +47,19 @@ pub fn run_diagnostics(bin_dir: &PathBuf) -> Result<DiagnosticReport> {
     if !broken_symlinks.is_empty() {
         error_details.push(format!("Broken symlinks detected: {:?}", broken_symlinks));
     }
+
+    #[cfg(windows)]
+    let windows_developer_mode = {
+        use winreg::enums::HKEY_LOCAL_MACHINE;
+        use winreg::RegKey;
+        RegKey::predef(HKEY_LOCAL_MACHINE)
+            .open_subkey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\AppModelUnlock")
+            .and_then(|k| k.get_value::<u32, _>("AllowDevelopmentWithoutDevLicense"))
+            .map(|val| val == 1)
+            .unwrap_or(false)
+    };
+    #[cfg(not(windows))]
+    let windows_developer_mode = true;
     
     Ok(DiagnosticReport {
         symlink_healthy: broken_symlinks.is_empty(),
@@ -54,6 +68,7 @@ pub fn run_diagnostics(bin_dir: &PathBuf) -> Result<DiagnosticReport> {
         permissions_ok: permission_issues.is_empty(),
         error_details,
         auto_fix_available: !broken_symlinks.is_empty(),
+        windows_developer_mode,
         is_healthy,
     })
 }

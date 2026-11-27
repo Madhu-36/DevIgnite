@@ -17,6 +17,7 @@ export interface DiagnosticReport {
   permissions_ok: boolean;
   error_details: string[];
   auto_fix_available: boolean;
+  windows_developer_mode: boolean;
   is_healthy: boolean;
 }
 
