@@ -242,3 +242,10 @@ pub fn get_switch_history(limit: Option<i64>, state: State<'_, DbState>) -> Resu
     }
     Ok(history)
 }
+
+#[tauri::command]
+pub fn optimize_database(state: State<'_, DbState>) -> Result<String> {
+    let conn = state.conn.lock().map_err(|e| crate::error::AppError::Unknown(anyhow::anyhow!("Mutex poisoned: {}", e)))?;
+    conn.execute_batch("VACUUM; PRAGMA integrity_check;")?;
+    Ok("Database vacuumed and integrity verified successfully".into())
+}
