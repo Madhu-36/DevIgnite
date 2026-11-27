@@ -32,7 +32,8 @@ pub fn run() {
             commands::run_diagnostics_cmd,
             commands::auto_fix_diagnostics_cmd,
             commands::get_system_path_status,
-            commands::export_runtimes_config
+            commands::export_runtimes_config,
+            commands::list_available_remote_versions
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

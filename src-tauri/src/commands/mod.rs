@@ -1,6 +1,7 @@
 use crate::db::{DbState, Runtime};
 use crate::doctor::{fix_broken_symlinks, run_diagnostics, AutoFixResult, DiagnosticReport};
 use crate::error::Result;
+use crate::installer::resolver::{get_catalog_for_tool, RemoteVersion};
 use tauri::State;
 
 #[tauri::command]
@@ -201,4 +202,10 @@ pub fn export_runtimes_config(state: State<'_, DbState>) -> Result<String> {
         runtimes,
     };
     serde_json::to_string_pretty(&payload).map_err(|e| crate::error::AppError::Unknown(e.into()))
+}
+
+#[tauri::command]
+pub fn list_available_remote_versions(tool: Option<String>) -> Result<Vec<RemoteVersion>> {
+    let tool_name = tool.unwrap_or_else(|| "all".into());
+    Ok(get_catalog_for_tool(&tool_name))
 }
